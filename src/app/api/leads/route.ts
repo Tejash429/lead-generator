@@ -3,31 +3,31 @@
 // POST /api/leads       — Save new leads
 // ============================================================
 
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { saveLeadsSchema, updateLeadSchema } from "@/lib/validations";
-import { z } from "zod";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { saveLeadsSchema, updateLeadSchema } from '@/lib/validations';
+import { z } from 'zod';
 
 /** GET /api/leads?status=new&city=&category=&page=1&limit=50 */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const status = searchParams.get("status");
-    const city = searchParams.get("city");
-    const category = searchParams.get("category");
-    const page = parseInt(searchParams.get("page") ?? "1", 10);
-    const rawLimit = parseInt(searchParams.get("limit") ?? "50", 10);
+    const status = searchParams.get('status');
+    const city = searchParams.get('city');
+    const category = searchParams.get('category');
+    const page = parseInt(searchParams.get('page') ?? '1', 10);
+    const rawLimit = parseInt(searchParams.get('limit') ?? '50', 10);
     const limit = Math.min(Math.max(rawLimit, 1), 100); // cap between 1 and 100
 
     const where: Record<string, unknown> = {};
     if (status) where.status = status;
-    if (city) where.city = { contains: city, mode: "insensitive" };
+    if (city) where.city = { contains: city, mode: 'insensitive' };
     if (category) where.category = category;
 
     const [leads, total] = await Promise.all([
       prisma.lead.findMany({
         where,
-        orderBy: { savedAt: "desc" },
+        orderBy: [{ leadScore: 'desc' }, { savedAt: 'desc' }],
         skip: (page - 1) * limit,
         take: limit,
       }),
@@ -41,10 +41,10 @@ export async function GET(request: NextRequest) {
       totalPages: Math.ceil(total / limit),
     });
   } catch (error) {
-    console.error("Fetch leads error:", error);
+    console.error('Fetch leads error:', error);
     return NextResponse.json(
-      { error: "Failed to fetch leads" },
-      { status: 500 }
+      { error: 'Failed to fetch leads' },
+      { status: 500 },
     );
   }
 }
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json(
         { error: parsed.error.issues[0].message },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -107,13 +107,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       saved: savedCount,
       skipped: skippedCount,
-      message: `Saved ${savedCount} leads${skippedCount > 0 ? `, ${skippedCount} skipped` : ""}`,
+      message: `Saved ${savedCount} leads${skippedCount > 0 ? `, ${skippedCount} skipped` : ''}`,
     });
   } catch (error) {
-    console.error("Save leads error:", error);
+    console.error('Save leads error:', error);
     return NextResponse.json(
-      { error: "Failed to save leads" },
-      { status: 500 }
+      { error: 'Failed to save leads' },
+      { status: 500 },
     );
   }
 }
@@ -128,20 +128,25 @@ export async function PATCH(request: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json(
         { error: parsed.error.issues[0].message },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const { id, status, notes } = parsed.data;
+    const { id, status, notes, lastContactedAt } = parsed.data;
 
     const updateData: Record<string, unknown> = {};
     if (status) updateData.status = status;
     if (notes !== undefined) updateData.notes = notes;
+    if (lastContactedAt) updateData.lastContactedAt = new Date(lastContactedAt);
+
+    if (status === 'contacted' && !lastContactedAt) {
+      updateData.lastContactedAt = new Date();
+    }
 
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json(
-        { error: "No fields to update" },
-        { status: 400 }
+        { error: 'No fields to update' },
+        { status: 400 },
       );
     }
 
@@ -152,10 +157,10 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ lead: updated });
   } catch (error) {
-    console.error("Update lead error:", error);
+    console.error('Update lead error:', error);
     return NextResponse.json(
-      { error: "Failed to update lead" },
-      { status: 500 }
+      { error: 'Failed to update lead' },
+      { status: 500 },
     );
   }
 }
@@ -164,23 +169,23 @@ export async function PATCH(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id");
+    const id = searchParams.get('id');
 
     // Validate ID format
-    const idSchema = z.string().min(1, "Lead ID required").max(100);
+    const idSchema = z.string().min(1, 'Lead ID required').max(100);
     const parsed = idSchema.safeParse(id);
     if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid lead ID" }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid lead ID' }, { status: 400 });
     }
 
     await prisma.lead.delete({ where: { id: parsed.data } });
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Delete lead error:", error);
+    console.error('Delete lead error:', error);
     return NextResponse.json(
-      { error: "Failed to delete lead" },
-      { status: 500 }
+      { error: 'Failed to delete lead' },
+      { status: 500 },
     );
   }
 }

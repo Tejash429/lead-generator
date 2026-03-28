@@ -26,6 +26,14 @@ interface GooglePlace {
   types?: string[];
   location?: { latitude: number; longitude: number };
   businessStatus?: string;
+  currentOpeningHours?: {
+    weekdayDescriptions?: string[];
+  };
+  reviews?: Array<{
+    text?: { text: string };
+    rating?: number;
+    relativePublishTimeDescription?: string;
+  }>;
 }
 
 /**
@@ -61,6 +69,8 @@ export async function searchBusinesses(
         "places.types",
         "places.location",
         "places.businessStatus",
+        "places.currentOpeningHours",
+        "places.reviews",
       ].join(","),
     },
     body: JSON.stringify({
@@ -99,5 +109,53 @@ export async function searchBusinesses(
       location: place.location
         ? { lat: place.location.latitude, lng: place.location.longitude }
         : null,
+      openingHours: place.currentOpeningHours?.weekdayDescriptions ?? null,
+      recentReview: place.reviews?.[0]
+        ? {
+            text: place.reviews[0].text?.text ?? "",
+            rating: place.reviews[0].rating ?? 0,
+            time: place.reviews[0].relativePublishTimeDescription ?? "",
+          }
+        : null,
     }));
+}
+
+export interface PlaceDetails {
+  openingHours: string[] | null;
+  recentReview: { text: string; rating: number; time: string } | null;
+}
+
+/**
+ * Fetch opening hours + latest review for a single place by ID.
+ * Uses the Places API v1 Get Place endpoint.
+ */
+export async function getPlaceDetails(placeId: string): Promise<PlaceDetails> {
+  if (!API_KEY || API_KEY === "your_google_places_api_key_here") {
+    throw new Error("Google Places API key not configured");
+  }
+
+  const res = await fetch(`${BASE_URL}/${placeId}`, {
+    headers: {
+      "X-Goog-Api-Key": API_KEY,
+      "X-Goog-FieldMask": "currentOpeningHours,reviews",
+    },
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Places API error: ${res.status} — ${err}`);
+  }
+
+  const place: GooglePlace = await res.json();
+
+  return {
+    openingHours: place.currentOpeningHours?.weekdayDescriptions ?? null,
+    recentReview: place.reviews?.[0]
+      ? {
+          text: place.reviews[0].text?.text ?? "",
+          rating: place.reviews[0].rating ?? 0,
+          time: place.reviews[0].relativePublishTimeDescription ?? "",
+        }
+      : null,
+  };
 }

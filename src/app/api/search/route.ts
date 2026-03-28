@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { searchBusinesses } from "@/lib/google-places";
 import { analyzeWebsite } from "@/lib/website-analyzer";
-import { calculateLeadScoreWithCategory } from "@/lib/lead-scoring";
+import { scoreLead } from "@/lib/lead-scoring";
 import { searchSchema } from "@/lib/validations";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitKey } from "@/lib/rate-limit";
@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
 
     // Calculate lead scores
     for (const biz of analyzedBusinesses) {
-      biz.leadScore = calculateLeadScoreWithCategory(biz, category);
+      biz.leadScore = scoreLead(biz).score;
     }
 
     // Sort: leads first, then by score descending, then by rating

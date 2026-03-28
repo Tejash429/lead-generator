@@ -1,42 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { SavedLeadsTable } from "@/components/saved-leads-table";
 import { LeadsOverviewStats } from "@/components/leads-overview-stats";
-import { Target } from "lucide-react";
 
 export default function LeadsPage() {
-  const [refreshKey, setRefreshKey] = useState(0);
+  const queryClient = useQueryClient();
 
   const handleRefresh = () => {
-    setRefreshKey((k) => k + 1);
+    queryClient.invalidateQueries({ queryKey: ["leads"] });
+    queryClient.invalidateQueries({ queryKey: ["leads-stats"] });
   };
 
   return (
     <div className="space-y-8">
       {/* Page Header */}
-      <div className="space-y-1">
-        <div className="flex items-center gap-2">
-          <div className="size-5 rounded flex items-center justify-center bg-primary/10">
-            <Target className="size-3 text-primary" />
-          </div>
-          <h2 className="text-[13px] font-semibold text-primary tracking-wide uppercase">
-            Lead Pipeline
-          </h2>
-        </div>
-        <p className="text-muted-foreground text-sm">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+          Lead Pipeline
+        </h1>
+        <p className="mt-1 text-gray-500 text-sm">
           Track outreach, manage status, and convert saved leads
         </p>
       </div>
 
       {/* Stats */}
-      <LeadsOverviewStats refreshTrigger={refreshKey} />
+      <LeadsOverviewStats />
 
       {/* Table */}
-      <SavedLeadsTable
-        refreshTrigger={refreshKey}
-        onLeadChange={handleRefresh}
-      />
+      <SavedLeadsTable onLeadChange={handleRefresh} />
     </div>
   );
 }

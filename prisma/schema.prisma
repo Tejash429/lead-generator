@@ -1,32 +1,32 @@
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
 }
 
 model Lead {
-  id            String   @id @default(cuid())
-  placeId       String   @unique
-  businessName  String
-  address       String
-  phone         String?
-  website       String?
-  rating        Float?
-  ratingCount   Int?
-  category      String
-  city          String
-  hasWebsite    Boolean  @default(false)
-  websiteSpeed  Int?
-  websiteStatus String?
-  leadScore     Int?
-  status        String   @default("new")
-  notes         String?
-  savedAt       DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id              String    @id @default(cuid())
+  placeId         String    @unique
+  businessName    String
+  address         String
+  phone           String?
+  website         String?
+  rating          Float?
+  ratingCount     Int?
+  category        String
+  city            String
+  hasWebsite      Boolean   @default(false)
+  websiteSpeed    Int?
+  websiteStatus   String?
+  leadScore       Int?
+  status          String    @default("new")
+  notes           String?
+  lastContactedAt DateTime?
+  savedAt         DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   @@index([city, category])
   @@index([hasWebsite])

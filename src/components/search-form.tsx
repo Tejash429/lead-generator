@@ -59,38 +59,30 @@ export function SearchForm({ onResults, onError }: SearchFormProps) {
 
   return (
     <div className='w-full'>
-      <div className='rounded-xl border bg-card p-1 shadow-sm'>
-        <div className='flex flex-col sm:flex-row'>
+      <div className='rounded-xl border border-gray-200 bg-white p-1.5 shadow-sm'>
+        <div className='flex flex-col sm:flex-row gap-1.5'>
           {/* City Input */}
           <div className='relative flex-1 min-w-0'>
-            <MapPin className='absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/50 pointer-events-none' />
+            <MapPin className='absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-gray-400 pointer-events-none' />
             <Input
               placeholder='City name (e.g. Austin, TX)'
               value={city}
               onChange={(e) => setCity(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              className='pl-10 h-11 border-0 shadow-none focus-visible:ring-0 rounded-lg bg-transparent text-sm'
+              className='pl-10 h-11 border-0 shadow-none focus-visible:ring-0 rounded-lg bg-gray-50 text-sm text-gray-900 placeholder:text-gray-400'
               disabled={loading}
             />
           </div>
 
-          {/* Divider */}
-          <div className='hidden sm:flex items-center px-0.5'>
-            <div className='w-px h-6 bg-border' />
-          </div>
-          <div className='sm:hidden mx-3'>
-            <div className='h-px bg-border' />
-          </div>
-
           {/* Category Select */}
           <div className='relative flex-1 min-w-0 sm:max-w-[260px]'>
-            <LayoutGrid className='absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/50 pointer-events-none z-10 ' />
+            <LayoutGrid className='absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-gray-400 pointer-events-none z-10' />
             <Select
               value={category}
               onValueChange={(v) => setCategory(v ?? '')}
               disabled={loading}
             >
-              <SelectTrigger className='pl-10 border-0 shadow-none focus-visible:ring-0 rounded-lg bg-transparent text-sm w-full data-[size=default]:h-11'>
+              <SelectTrigger className='pl-10 border-0 shadow-none focus-visible:ring-0 rounded-lg bg-gray-50 text-sm w-full data-[size=default]:h-11'>
                 <SelectValue placeholder='Business type' />
               </SelectTrigger>
               <SelectContent>
@@ -104,37 +96,35 @@ export function SearchForm({ onResults, onError }: SearchFormProps) {
           </div>
 
           {/* Search Button */}
-          <div className='p-1 sm:p-0 sm:pl-1'>
-            <Button
-              onClick={handleSearch}
-              disabled={loading}
-              className='h-11 px-5 w-full sm:w-auto rounded-lg font-medium'
-              size='lg'
-            >
-              {loading ? (
-                <>
-                  <Loader2 className='size-4 animate-spin' />
-                  <span className='ml-2'>Scanning…</span>
-                </>
-              ) : (
-                <>
-                  <Search className='size-4' />
-                  <span className='ml-2'>Find Leads</span>
-                </>
-              )}
-            </Button>
-          </div>
+          <Button
+            onClick={handleSearch}
+            disabled={loading}
+            className='h-11 px-6 rounded-lg font-semibold bg-indigo-600 hover:bg-indigo-700 text-white'
+            size='lg'
+          >
+            {loading ? (
+              <>
+                <Loader2 className='size-4 animate-spin' />
+                <span className='ml-2'>Scanning…</span>
+              </>
+            ) : (
+              <>
+                <Search className='size-4' />
+                <span className='ml-2'>Find Leads</span>
+              </>
+            )}
+          </Button>
         </div>
       </div>
 
       {loading && (
-        <div className='flex items-center gap-2 mt-4 px-1'>
+        <div className='flex items-center gap-2.5 mt-4 px-1'>
           <div className='flex gap-1'>
-            <span className='size-1.5 rounded-full bg-primary/60 animate-pulse' />
-            <span className='size-1.5 rounded-full bg-primary/40 animate-pulse [animation-delay:150ms]' />
-            <span className='size-1.5 rounded-full bg-primary/20 animate-pulse [animation-delay:300ms]' />
+            <span className='size-1.5 rounded-full bg-indigo-600 animate-pulse' />
+            <span className='size-1.5 rounded-full bg-indigo-400 animate-pulse [animation-delay:150ms]' />
+            <span className='size-1.5 rounded-full bg-indigo-300 animate-pulse [animation-delay:300ms]' />
           </div>
-          <p className='text-sm text-muted-foreground'>
+          <p className='text-sm text-gray-500'>
             Searching Google Places & analyzing websites… ~15-30s
           </p>
         </div>

@@ -1,16 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import {
-  Users,
-  Sparkles,
-  Mail,
-  TrendingUp,
-} from "lucide-react";
-
-interface LeadsOverviewStatsProps {
-  refreshTrigger: number;
-}
+import { useQuery } from "@tanstack/react-query";
+import { Users, Sparkles, Mail, TrendingUp } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface StatsData {
   total: number;
@@ -19,30 +11,42 @@ interface StatsData {
   converted: number;
 }
 
-export function LeadsOverviewStats({
-  refreshTrigger,
-}: LeadsOverviewStatsProps) {
-  const [stats, setStats] = useState<StatsData>({
-    total: 0,
-    new: 0,
-    contacted: 0,
-    converted: 0,
+async function fetchLeadStats(): Promise<StatsData> {
+  const res = await fetch("/api/leads/stats");
+  if (!res.ok) return { total: 0, new: 0, contacted: 0, converted: 0 };
+  return res.json();
+}
+
+function StatsSkeleton() {
+  return (
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {[...Array(4)].map((_, i) => (
+        <div
+          key={i}
+          className="rounded-xl border border-gray-200 bg-white p-5 space-y-4"
+        >
+          <Skeleton className="size-9 rounded-lg" />
+          <div className="space-y-1.5">
+            <Skeleton className="h-7 w-16" />
+            <Skeleton className="h-3 w-20" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+interface LeadsOverviewStatsProps {
+  refreshTrigger?: number;
+}
+
+export function LeadsOverviewStats({ refreshTrigger }: LeadsOverviewStatsProps) {
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ["leads-stats", refreshTrigger],
+    queryFn: fetchLeadStats,
   });
 
-  useEffect(() => {
-    async function fetchStats() {
-      try {
-        const res = await fetch("/api/leads/stats");
-        if (res.ok) {
-          const data = await res.json();
-          setStats(data);
-        }
-      } catch {
-        // Silently fail
-      }
-    }
-    fetchStats();
-  }, [refreshTrigger]);
+  if (isLoading || !stats) return <StatsSkeleton />;
 
   const conversionRate =
     stats.total > 0 ? Math.round((stats.converted / stats.total) * 100) : 0;
@@ -52,48 +56,50 @@ export function LeadsOverviewStats({
       label: "Total Leads",
       value: stats.total,
       icon: Users,
-      accent: "text-foreground",
-      iconColor: "text-muted-foreground",
+      iconBg: "bg-gray-100",
+      iconColor: "text-gray-600",
     },
     {
-      label: "New",
+      label: "Hot Leads",
       value: stats.new,
       icon: Sparkles,
-      accent: "text-primary",
-      iconColor: "text-primary/70",
+      iconBg: "bg-indigo-50",
+      iconColor: "text-indigo-600",
     },
     {
       label: "Contacted",
       value: stats.contacted,
       icon: Mail,
-      accent: "text-amber-600 dark:text-amber-400",
-      iconColor: "text-amber-500/70",
+      iconBg: "bg-amber-50",
+      iconColor: "text-amber-600",
     },
     {
-      label: "Conversion",
+      label: "Converted",
       value: `${conversionRate}%`,
       icon: TrendingUp,
-      accent: "text-emerald-600 dark:text-emerald-400",
-      iconColor: "text-emerald-500/70",
+      iconBg: "bg-emerald-50",
+      iconColor: "text-emerald-600",
     },
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       {statItems.map((stat) => (
         <div
           key={stat.label}
-          className="relative rounded-xl border bg-card p-4 transition-colors hover:bg-accent/30"
+          className="rounded-xl border border-gray-200 bg-white p-5 hover:border-gray-300 transition-colors"
         >
-          <div className="flex items-start justify-between mb-3">
-            <stat.icon className={`size-4 ${stat.iconColor}`} />
+          <div className="flex items-center justify-between mb-4">
+            <div
+              className={`size-9 rounded-lg flex items-center justify-center ${stat.iconBg}`}
+            >
+              <stat.icon className={`size-4 ${stat.iconColor}`} />
+            </div>
           </div>
-          <p
-            className={`text-2xl font-bold tracking-tight tabular-nums ${stat.accent}`}
-          >
+          <p className="text-2xl font-bold tracking-tight tabular-nums text-gray-900">
             {stat.value}
           </p>
-          <p className="text-xs text-muted-foreground mt-0.5">{stat.label}</p>
+          <p className="text-xs text-gray-500 mt-0.5">{stat.label}</p>
         </div>
       ))}
     </div>

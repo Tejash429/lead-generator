@@ -27,54 +27,54 @@ export function StatsCards({
       label: "Businesses",
       value: totalSearched,
       icon: Building2,
-      accent: "text-foreground",
-      iconColor: "text-muted-foreground",
+      iconBg: "bg-gray-100",
+      iconColor: "text-gray-600",
     },
     {
       label: "Leads found",
       value: leadsFound,
       suffix: `${leadRate}%`,
       icon: Target,
-      accent: "text-primary",
-      iconColor: "text-primary",
+      iconBg: "bg-indigo-50",
+      iconColor: "text-indigo-600",
     },
     {
       label: "No website",
       value: noWebsite,
       icon: Globe,
-      accent: "text-destructive",
-      iconColor: "text-destructive/70",
+      iconBg: "bg-red-50",
+      iconColor: "text-red-600",
     },
     {
       label: "Slow / broken",
       value: slowWebsite,
       icon: AlertTriangle,
-      accent: "text-amber-600 dark:text-amber-400",
-      iconColor: "text-amber-500/70",
+      iconBg: "bg-amber-50",
+      iconColor: "text-amber-600",
     },
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       {stats.map((stat) => (
         <div
           key={stat.label}
-          className="group relative rounded-xl border bg-card p-4 transition-colors hover:bg-accent/30"
+          className="rounded-xl border border-gray-200 bg-white p-5 hover:border-gray-300 transition-colors"
         >
-          <div className="flex items-start justify-between mb-3">
-            <stat.icon className={`size-4 ${stat.iconColor}`} />
+          <div className="flex items-center justify-between mb-4">
+            <div className={`size-9 rounded-lg flex items-center justify-center ${stat.iconBg}`}>
+              <stat.icon className={`size-4 ${stat.iconColor}`} />
+            </div>
             {stat.suffix && (
-              <span className="text-[11px] font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+              <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
                 {stat.suffix}
               </span>
             )}
           </div>
-          <p className={`text-2xl font-bold tracking-tight tabular-nums ${stat.accent}`}>
+          <p className="text-2xl font-bold tracking-tight tabular-nums text-gray-900">
             {stat.value}
           </p>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {stat.label}
-          </p>
+          <p className="text-xs text-gray-500 mt-0.5">{stat.label}</p>
         </div>
       ))}
     </div>

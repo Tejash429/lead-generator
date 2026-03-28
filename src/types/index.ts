@@ -16,6 +16,12 @@ export interface PlaceBusiness {
     lat: number;
     lng: number;
   } | null;
+  openingHours: string[] | null;
+  recentReview: {
+    text: string;
+    rating: number;
+    time: string;
+  } | null;
 }
 
 /** Website analysis result */
@@ -54,6 +60,7 @@ export interface Lead {
   leadScore: number | null;
   status: LeadStatus;
   notes: string | null;
+  lastContactedAt: string | null;
   savedAt: string;
   updatedAt: string;
 }

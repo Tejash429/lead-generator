@@ -40,6 +40,7 @@ export const updateLeadSchema = z.object({
   id: z.string(),
   status: z.enum(["new", "contacted", "responded", "converted", "skipped"]).optional(),
   notes: z.string().optional(),
+  lastContactedAt: z.string().datetime().optional(),
 });
 
 export const analyzeUrlSchema = z.object({
