@@ -58,6 +58,7 @@ export interface Lead {
   websiteSpeed: number | null;
   websiteStatus: string | null;
   leadScore: number | null;
+  isFavorite: boolean;
   status: LeadStatus;
   notes: string | null;
   lastContactedAt: string | null;

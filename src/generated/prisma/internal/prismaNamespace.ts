@@ -607,6 +607,7 @@ export const LeadScalarFieldEnum = {
   websiteSpeed: 'websiteSpeed',
   websiteStatus: 'websiteStatus',
   leadScore: 'leadScore',
+  isFavorite: 'isFavorite',
   status: 'status',
   notes: 'notes',
   lastContactedAt: 'lastContactedAt',

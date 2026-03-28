@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
     const city = searchParams.get('city');
     const category = searchParams.get('category');
+    const favorite = searchParams.get('favorite');
     const page = parseInt(searchParams.get('page') ?? '1', 10);
     const rawLimit = parseInt(searchParams.get('limit') ?? '50', 10);
     const limit = Math.min(Math.max(rawLimit, 1), 100); // cap between 1 and 100
@@ -23,11 +24,16 @@ export async function GET(request: NextRequest) {
     if (status) where.status = status;
     if (city) where.city = { contains: city, mode: 'insensitive' };
     if (category) where.category = category;
+    if (favorite === 'true' || favorite === '1') where.isFavorite = true;
 
     const [leads, total] = await Promise.all([
       prisma.lead.findMany({
         where,
-        orderBy: [{ leadScore: 'desc' }, { savedAt: 'desc' }],
+        orderBy: [
+          { isFavorite: 'desc' },
+          { leadScore: 'desc' },
+          { savedAt: 'desc' },
+        ],
         skip: (page - 1) * limit,
         take: limit,
       }),
@@ -132,12 +138,13 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const { id, status, notes, lastContactedAt } = parsed.data;
+    const { id, status, notes, lastContactedAt, isFavorite } = parsed.data;
 
     const updateData: Record<string, unknown> = {};
     if (status) updateData.status = status;
     if (notes !== undefined) updateData.notes = notes;
     if (lastContactedAt) updateData.lastContactedAt = new Date(lastContactedAt);
+    if (isFavorite !== undefined) updateData.isFavorite = isFavorite;
 
     if (status === 'contacted' && !lastContactedAt) {
       updateData.lastContactedAt = new Date();

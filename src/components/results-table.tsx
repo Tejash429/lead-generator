@@ -15,7 +15,6 @@ import {
   Clock,
   MessageSquare,
   ChevronDown,
-  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,6 +33,10 @@ import type { AnalyzedBusiness } from "@/types";
 import { getScoreLabel } from "@/lib/lead-scoring";
 import { EmailGenerator } from "@/components/email-generator";
 import { AIPitchModal } from "@/components/ai-pitch-modal";
+import {
+  CopyBusinessLabel,
+  QuickGoogleActions,
+} from "@/components/business-quick-actions";
 import { toast } from "sonner";
 
 export type ResultsSortOption =
@@ -324,18 +327,19 @@ export function ResultsTable({
                       } ${isExpanded ? "ring-2 ring-indigo-300 border-indigo-300" : ""} ${biz.isLead ? "" : "opacity-60"}`}
                     >
                       <div className="p-4 pb-3">
-                        <div className="flex items-center gap-2.5">
+                        <div className="flex items-start gap-2.5">
                           <input
                             type="checkbox"
                             checked={isSelected}
                             onChange={() => toggleSelect(biz.placeId)}
-                            className="size-4 rounded accent-indigo-600 cursor-pointer shrink-0"
+                            className="size-4 rounded accent-indigo-600 cursor-pointer shrink-0 mt-0.5"
                           />
                           <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1.5 flex-wrap min-w-0">
                               <h4 className="font-semibold text-sm text-gray-900 truncate" title={biz.name}>
                                 {biz.name}
                               </h4>
+                              <CopyBusinessLabel businessName={biz.name} city={city} />
                               {biz.alreadySaved && (
                                 <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full shrink-0">
                                   <BookmarkCheck className="size-2.5" />
@@ -344,7 +348,15 @@ export function ResultsTable({
                               )}
                             </div>
                           </div>
-                          <ScoreBadge score={biz.leadScore} />
+                          <div className="shrink-0 flex items-center gap-0.5">
+                            <QuickGoogleActions
+                              businessName={biz.name}
+                              city={city}
+                              placeId={biz.placeId}
+                              website={biz.website}
+                            />
+                            <ScoreBadge score={biz.leadScore} />
+                          </div>
                         </div>
 
                         <div className="ml-[26px] mt-1">
@@ -390,24 +402,6 @@ export function ResultsTable({
                                 <span>Call</span>
                               </TooltipTrigger>
                               <TooltipContent>{biz.phone}</TooltipContent>
-                            </Tooltip>
-                          )}
-                          {biz.website && (
-                            <Tooltip>
-                              <TooltipTrigger
-                                render={
-                                  <a
-                                    href={biz.website}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1.5 h-7 px-2 rounded-md text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-                                  />
-                                }
-                              >
-                                <ExternalLink className="size-3.5" />
-                                <span>Site</span>
-                              </TooltipTrigger>
-                              <TooltipContent>Visit website</TooltipContent>
                             </Tooltip>
                           )}
                           {biz.isLead && (

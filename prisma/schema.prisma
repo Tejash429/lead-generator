@@ -22,6 +22,7 @@ model Lead {
   websiteSpeed    Int?
   websiteStatus   String?
   leadScore       Int?
+  isFavorite      Boolean   @default(false)
   status          String    @default("new")
   notes           String?
   lastContactedAt DateTime?
@@ -31,6 +32,7 @@ model Lead {
   @@index([city, category])
   @@index([hasWebsite])
   @@index([status])
+  @@index([isFavorite])
   @@map("leads")
 }
 

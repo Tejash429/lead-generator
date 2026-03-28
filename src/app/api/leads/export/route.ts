@@ -12,15 +12,20 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get("status");
     const city = searchParams.get("city");
     const category = searchParams.get("category");
+    const favorite = searchParams.get("favorite");
 
     const where: Record<string, unknown> = {};
     if (status) where.status = status;
     if (city) where.city = { contains: city, mode: "insensitive" };
     if (category) where.category = category;
+    if (favorite === "true" || favorite === "1") where.isFavorite = true;
 
     const leads = await prisma.lead.findMany({
       where,
-      orderBy: { savedAt: "desc" },
+      orderBy: [
+        { isFavorite: "desc" },
+        { savedAt: "desc" },
+      ],
     });
 
     if (leads.length === 0) {
@@ -37,6 +42,7 @@ export async function GET(request: NextRequest) {
       "Address": lead.address,
       "Website": lead.website ?? "No website",
       "Website Status": lead.websiteStatus ?? "Not checked",
+      "Priority": lead.isFavorite ? "Yes" : "No",
       "Lead Score": lead.leadScore ?? "N/A",
       "Rating": lead.rating ?? "N/A",
       "Review Count": lead.ratingCount ?? "N/A",

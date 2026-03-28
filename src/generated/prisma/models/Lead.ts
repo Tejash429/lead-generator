@@ -55,6 +55,7 @@ export type LeadMinAggregateOutputType = {
   websiteSpeed: number | null
   websiteStatus: string | null
   leadScore: number | null
+  isFavorite: boolean | null
   status: string | null
   notes: string | null
   lastContactedAt: Date | null
@@ -77,6 +78,7 @@ export type LeadMaxAggregateOutputType = {
   websiteSpeed: number | null
   websiteStatus: string | null
   leadScore: number | null
+  isFavorite: boolean | null
   status: string | null
   notes: string | null
   lastContactedAt: Date | null
@@ -99,6 +101,7 @@ export type LeadCountAggregateOutputType = {
   websiteSpeed: number
   websiteStatus: number
   leadScore: number
+  isFavorite: number
   status: number
   notes: number
   lastContactedAt: number
@@ -137,6 +140,7 @@ export type LeadMinAggregateInputType = {
   websiteSpeed?: true
   websiteStatus?: true
   leadScore?: true
+  isFavorite?: true
   status?: true
   notes?: true
   lastContactedAt?: true
@@ -159,6 +163,7 @@ export type LeadMaxAggregateInputType = {
   websiteSpeed?: true
   websiteStatus?: true
   leadScore?: true
+  isFavorite?: true
   status?: true
   notes?: true
   lastContactedAt?: true
@@ -181,6 +186,7 @@ export type LeadCountAggregateInputType = {
   websiteSpeed?: true
   websiteStatus?: true
   leadScore?: true
+  isFavorite?: true
   status?: true
   notes?: true
   lastContactedAt?: true
@@ -290,6 +296,7 @@ export type LeadGroupByOutputType = {
   websiteSpeed: number | null
   websiteStatus: string | null
   leadScore: number | null
+  isFavorite: boolean
   status: string
   notes: string | null
   lastContactedAt: Date | null
@@ -335,6 +342,7 @@ export type LeadWhereInput = {
   websiteSpeed?: Prisma.IntNullableFilter<"Lead"> | number | null
   websiteStatus?: Prisma.StringNullableFilter<"Lead"> | string | null
   leadScore?: Prisma.IntNullableFilter<"Lead"> | number | null
+  isFavorite?: Prisma.BoolFilter<"Lead"> | boolean
   status?: Prisma.StringFilter<"Lead"> | string
   notes?: Prisma.StringNullableFilter<"Lead"> | string | null
   lastContactedAt?: Prisma.DateTimeNullableFilter<"Lead"> | Date | string | null
@@ -357,6 +365,7 @@ export type LeadOrderByWithRelationInput = {
   websiteSpeed?: Prisma.SortOrderInput | Prisma.SortOrder
   websiteStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   leadScore?: Prisma.SortOrderInput | Prisma.SortOrder
+  isFavorite?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   lastContactedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -382,6 +391,7 @@ export type LeadWhereUniqueInput = Prisma.AtLeast<{
   websiteSpeed?: Prisma.IntNullableFilter<"Lead"> | number | null
   websiteStatus?: Prisma.StringNullableFilter<"Lead"> | string | null
   leadScore?: Prisma.IntNullableFilter<"Lead"> | number | null
+  isFavorite?: Prisma.BoolFilter<"Lead"> | boolean
   status?: Prisma.StringFilter<"Lead"> | string
   notes?: Prisma.StringNullableFilter<"Lead"> | string | null
   lastContactedAt?: Prisma.DateTimeNullableFilter<"Lead"> | Date | string | null
@@ -404,6 +414,7 @@ export type LeadOrderByWithAggregationInput = {
   websiteSpeed?: Prisma.SortOrderInput | Prisma.SortOrder
   websiteStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   leadScore?: Prisma.SortOrderInput | Prisma.SortOrder
+  isFavorite?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   lastContactedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -434,6 +445,7 @@ export type LeadScalarWhereWithAggregatesInput = {
   websiteSpeed?: Prisma.IntNullableWithAggregatesFilter<"Lead"> | number | null
   websiteStatus?: Prisma.StringNullableWithAggregatesFilter<"Lead"> | string | null
   leadScore?: Prisma.IntNullableWithAggregatesFilter<"Lead"> | number | null
+  isFavorite?: Prisma.BoolWithAggregatesFilter<"Lead"> | boolean
   status?: Prisma.StringWithAggregatesFilter<"Lead"> | string
   notes?: Prisma.StringNullableWithAggregatesFilter<"Lead"> | string | null
   lastContactedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Lead"> | Date | string | null
@@ -456,6 +468,7 @@ export type LeadCreateInput = {
   websiteSpeed?: number | null
   websiteStatus?: string | null
   leadScore?: number | null
+  isFavorite?: boolean
   status?: string
   notes?: string | null
   lastContactedAt?: Date | string | null
@@ -478,6 +491,7 @@ export type LeadUncheckedCreateInput = {
   websiteSpeed?: number | null
   websiteStatus?: string | null
   leadScore?: number | null
+  isFavorite?: boolean
   status?: string
   notes?: string | null
   lastContactedAt?: Date | string | null
@@ -500,6 +514,7 @@ export type LeadUpdateInput = {
   websiteSpeed?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   websiteStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastContactedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -522,6 +537,7 @@ export type LeadUncheckedUpdateInput = {
   websiteSpeed?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   websiteStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastContactedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -544,6 +560,7 @@ export type LeadCreateManyInput = {
   websiteSpeed?: number | null
   websiteStatus?: string | null
   leadScore?: number | null
+  isFavorite?: boolean
   status?: string
   notes?: string | null
   lastContactedAt?: Date | string | null
@@ -566,6 +583,7 @@ export type LeadUpdateManyMutationInput = {
   websiteSpeed?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   websiteStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastContactedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -588,6 +606,7 @@ export type LeadUncheckedUpdateManyInput = {
   websiteSpeed?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   websiteStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastContactedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -610,6 +629,7 @@ export type LeadCountOrderByAggregateInput = {
   websiteSpeed?: Prisma.SortOrder
   websiteStatus?: Prisma.SortOrder
   leadScore?: Prisma.SortOrder
+  isFavorite?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   lastContactedAt?: Prisma.SortOrder
@@ -639,6 +659,7 @@ export type LeadMaxOrderByAggregateInput = {
   websiteSpeed?: Prisma.SortOrder
   websiteStatus?: Prisma.SortOrder
   leadScore?: Prisma.SortOrder
+  isFavorite?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   lastContactedAt?: Prisma.SortOrder
@@ -661,6 +682,7 @@ export type LeadMinOrderByAggregateInput = {
   websiteSpeed?: Prisma.SortOrder
   websiteStatus?: Prisma.SortOrder
   leadScore?: Prisma.SortOrder
+  isFavorite?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   lastContactedAt?: Prisma.SortOrder
@@ -728,6 +750,7 @@ export type LeadSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   websiteSpeed?: boolean
   websiteStatus?: boolean
   leadScore?: boolean
+  isFavorite?: boolean
   status?: boolean
   notes?: boolean
   lastContactedAt?: boolean
@@ -750,6 +773,7 @@ export type LeadSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   websiteSpeed?: boolean
   websiteStatus?: boolean
   leadScore?: boolean
+  isFavorite?: boolean
   status?: boolean
   notes?: boolean
   lastContactedAt?: boolean
@@ -772,6 +796,7 @@ export type LeadSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   websiteSpeed?: boolean
   websiteStatus?: boolean
   leadScore?: boolean
+  isFavorite?: boolean
   status?: boolean
   notes?: boolean
   lastContactedAt?: boolean
@@ -794,6 +819,7 @@ export type LeadSelectScalar = {
   websiteSpeed?: boolean
   websiteStatus?: boolean
   leadScore?: boolean
+  isFavorite?: boolean
   status?: boolean
   notes?: boolean
   lastContactedAt?: boolean
@@ -801,7 +827,7 @@ export type LeadSelectScalar = {
   updatedAt?: boolean
 }
 
-export type LeadOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "placeId" | "businessName" | "address" | "phone" | "website" | "rating" | "ratingCount" | "category" | "city" | "hasWebsite" | "websiteSpeed" | "websiteStatus" | "leadScore" | "status" | "notes" | "lastContactedAt" | "savedAt" | "updatedAt", ExtArgs["result"]["lead"]>
+export type LeadOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "placeId" | "businessName" | "address" | "phone" | "website" | "rating" | "ratingCount" | "category" | "city" | "hasWebsite" | "websiteSpeed" | "websiteStatus" | "leadScore" | "isFavorite" | "status" | "notes" | "lastContactedAt" | "savedAt" | "updatedAt", ExtArgs["result"]["lead"]>
 
 export type $LeadPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Lead"
@@ -821,6 +847,7 @@ export type $LeadPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     websiteSpeed: number | null
     websiteStatus: string | null
     leadScore: number | null
+    isFavorite: boolean
     status: string
     notes: string | null
     lastContactedAt: Date | null
@@ -1263,6 +1290,7 @@ export interface LeadFieldRefs {
   readonly websiteSpeed: Prisma.FieldRef<"Lead", 'Int'>
   readonly websiteStatus: Prisma.FieldRef<"Lead", 'String'>
   readonly leadScore: Prisma.FieldRef<"Lead", 'Int'>
+  readonly isFavorite: Prisma.FieldRef<"Lead", 'Boolean'>
   readonly status: Prisma.FieldRef<"Lead", 'String'>
   readonly notes: Prisma.FieldRef<"Lead", 'String'>
   readonly lastContactedAt: Prisma.FieldRef<"Lead", 'DateTime'>

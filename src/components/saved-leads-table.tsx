@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Phone,
@@ -21,6 +21,7 @@ import {
   Filter,
   X,
   Clock,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,6 +59,11 @@ import { EmailGenerator } from "@/components/email-generator";
 import { AIPitchModal } from "@/components/ai-pitch-modal";
 import { ConfirmationDialog } from "@/components/confirmation-dialog";
 import { toast } from "sonner";
+import {
+  CopyBusinessLabel,
+  QuickGoogleActions,
+} from "@/components/business-quick-actions";
+import { cn } from "@/lib/utils";
 
 const STATUS_OPTIONS: {
   value: LeadStatus;
@@ -189,6 +195,7 @@ async function fetchLeadsData(params: {
   filterStatus: string;
   filterCity: string;
   filterCategory: string;
+  priorityOnly: boolean;
 }): Promise<{ leads: Lead[]; total: number }> {
   const qs = new URLSearchParams({
     limit: PAGE_SIZE.toString(),
@@ -197,6 +204,7 @@ async function fetchLeadsData(params: {
   if (params.filterStatus) qs.set("status", params.filterStatus);
   if (params.filterCity.trim()) qs.set("city", params.filterCity.trim());
   if (params.filterCategory) qs.set("category", params.filterCategory);
+  if (params.priorityOnly) qs.set("favorite", "true");
 
   const res = await fetch(`/api/leads?${qs.toString()}`);
   if (!res.ok) throw new Error("Failed to load leads");
@@ -214,6 +222,7 @@ export function SavedLeadsTable({
   const [filterStatus, setFilterStatus] = useState<string>("");
   const [filterCity, setFilterCity] = useState("");
   const [filterCategory, setFilterCategory] = useState<string>("");
+  const [priorityOnly, setPriorityOnly] = useState(false);
   const [debouncedCity, setDebouncedCity] = useState("");
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -223,6 +232,9 @@ export function SavedLeadsTable({
     name: string;
   } | null>(null);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [expandedMobileLeadId, setExpandedMobileLeadId] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedCity(filterCity), 500);
@@ -232,7 +244,12 @@ export function SavedLeadsTable({
   useEffect(() => {
     setPage(1);
     setSelectedIds(new Set());
-  }, [filterStatus, filterCategory, debouncedCity]);
+    setExpandedMobileLeadId(null);
+  }, [filterStatus, filterCategory, debouncedCity, priorityOnly]);
+
+  useEffect(() => {
+    setExpandedMobileLeadId(null);
+  }, [page]);
 
   const {
     data,
@@ -245,6 +262,7 @@ export function SavedLeadsTable({
       filterStatus,
       debouncedCity,
       filterCategory,
+      priorityOnly,
       refreshTrigger,
     ],
     queryFn: () =>
@@ -253,15 +271,16 @@ export function SavedLeadsTable({
         filterStatus,
         filterCity: debouncedCity,
         filterCategory,
+        priorityOnly,
       }),
   });
 
   const leads = data?.leads ?? [];
   const total = data?.total ?? 0;
 
-  const activeFilterCount = [filterStatus, filterCity, filterCategory].filter(
-    Boolean
-  ).length;
+  const activeFilterCount =
+    [filterStatus, filterCity, filterCategory].filter(Boolean).length +
+    (priorityOnly ? 1 : 0);
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
   const invalidateLeads = () => {
@@ -340,6 +359,23 @@ export function SavedLeadsTable({
     setSelectedIds(new Set());
     invalidateLeads();
     onLeadChange?.();
+  };
+
+  const togglePriority = async (id: string, isFavorite: boolean) => {
+    try {
+      const res = await fetch("/api/leads", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, isFavorite }),
+      });
+      if (res.ok) {
+        invalidateLeads();
+        onLeadChange?.();
+        toast.success(isFavorite ? "Marked as priority" : "Removed from priority");
+      }
+    } catch {
+      toast.error("Could not update priority");
+    }
   };
 
   const updateNotes = async (id: string, notes: string) => {
@@ -500,6 +536,19 @@ export function SavedLeadsTable({
             </SelectContent>
           </Select>
 
+          <Select
+            value={priorityOnly ? "priority" : "all"}
+            onValueChange={(v) => setPriorityOnly(v === "priority")}
+          >
+            <SelectTrigger className="w-full sm:w-[158px] h-8 text-xs border-gray-200">
+              <SelectValue placeholder="Scope" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All leads</SelectItem>
+              <SelectItem value="priority">Priority only</SelectItem>
+            </SelectContent>
+          </Select>
+
           {activeFilterCount > 0 && (
             <Button
               variant="ghost"
@@ -509,6 +558,7 @@ export function SavedLeadsTable({
                 setFilterStatus("");
                 setFilterCity("");
                 setFilterCategory("");
+                setPriorityOnly(false);
               }}
             >
               <X className="size-3" />
@@ -655,12 +705,14 @@ export function SavedLeadsTable({
                     Date.now() - new Date(lead.lastContactedAt).getTime() > 7 * 86400000;
 
                   return (
+                    <Fragment key={lead.id}>
                     <TableRow
-                      key={lead.id}
                       className={`group transition-colors border-b border-gray-100 ${
                         isSelected
                           ? "bg-indigo-50/50 hover:bg-indigo-50"
-                          : "hover:bg-gray-50"
+                          : lead.isFavorite
+                            ? "bg-amber-50/35 hover:bg-amber-50/55"
+                            : "hover:bg-gray-50"
                       }`}
                     >
                       <TableCell className="pl-4">
@@ -676,12 +728,75 @@ export function SavedLeadsTable({
                       {/* Business */}
                       <TableCell>
                         <div className="min-w-[160px] max-w-[280px]">
-                          <p
-                            className="font-semibold text-sm text-gray-900 leading-tight truncate"
-                            title={lead.businessName}
-                          >
-                            {lead.businessName}
-                          </p>
+                          <div className="flex items-center gap-1 min-w-0">
+                            <Tooltip>
+                              <TooltipTrigger
+                                render={
+                                  <button
+                                    type="button"
+                                    className="shrink-0 rounded p-0.5 text-gray-300 hover:bg-amber-100/80 hover:text-amber-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/60"
+                                    aria-label={
+                                      lead.isFavorite
+                                        ? "Remove priority — start here"
+                                        : "Mark as priority — start outreach here"
+                                    }
+                                    aria-pressed={lead.isFavorite}
+                                    onClick={() =>
+                                      togglePriority(lead.id, !lead.isFavorite)
+                                    }
+                                  />
+                                }
+                              >
+                                <Star
+                                  className={cn(
+                                    "size-4",
+                                    lead.isFavorite
+                                      ? "fill-amber-400 text-amber-500"
+                                      : ""
+                                  )}
+                                />
+                              </TooltipTrigger>
+                              <TooltipContent side="top">
+                                {lead.isFavorite
+                                  ? "Priority lead — click to unmark"
+                                  : "Mark as priority (start here)"}
+                              </TooltipContent>
+                            </Tooltip>
+                            <p
+                              className="font-semibold text-sm text-gray-900 leading-tight truncate min-w-0 flex-1"
+                              title={lead.businessName}
+                            >
+                              {lead.businessName}
+                            </p>
+                            <span className="hidden md:inline-flex shrink-0">
+                              <CopyBusinessLabel
+                                businessName={lead.businessName}
+                                city={lead.city}
+                              />
+                            </span>
+                            <button
+                              type="button"
+                              className="md:hidden shrink-0 rounded p-0.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+                              aria-expanded={expandedMobileLeadId === lead.id}
+                              aria-label={
+                                expandedMobileLeadId === lead.id
+                                  ? "Hide quick links"
+                                  : "Show Google & quick links"
+                              }
+                              onClick={() =>
+                                setExpandedMobileLeadId((id) =>
+                                  id === lead.id ? null : lead.id
+                                )
+                              }
+                            >
+                              <ChevronDown
+                                className={cn(
+                                  "size-4 transition-transform",
+                                  expandedMobileLeadId === lead.id && "rotate-180"
+                                )}
+                              />
+                            </button>
+                          </div>
                           <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
                             <MapPin className="size-3 shrink-0 text-gray-400" />
                             <span className="truncate max-w-[200px]">{lead.address}</span>
@@ -689,6 +804,27 @@ export function SavedLeadsTable({
                           <p className="text-[11px] text-gray-400 mt-0.5 capitalize">
                             {lead.category.replace(/_/g, " ")} · {lead.city}
                           </p>
+                          {(lead.rating != null || lead.ratingCount != null) && (
+                            <p className="text-xs text-gray-500 flex items-center gap-1.5 mt-1">
+                              {lead.rating != null && (
+                                <>
+                                  <Star className="size-3.5 shrink-0 fill-amber-400 text-amber-400" />
+                                  <span className="font-medium text-gray-700 tabular-nums">
+                                    {lead.rating}
+                                  </span>
+                                </>
+                              )}
+                              {lead.ratingCount != null && (
+                                <span className="text-gray-400">
+                                  {lead.rating != null ? (
+                                    <span>({lead.ratingCount} reviews)</span>
+                                  ) : (
+                                    <span>{lead.ratingCount} reviews</span>
+                                  )}
+                                </span>
+                              )}
+                            </p>
+                          )}
                         </div>
                       </TableCell>
 
@@ -801,8 +937,16 @@ export function SavedLeadsTable({
                       </TableCell>
 
                       {/* Actions */}
-                      <TableCell>
-                        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <TableCell className="align-top">
+                        <div className="hidden md:flex items-center justify-end gap-0.5 mb-1">
+                          <QuickGoogleActions
+                            businessName={lead.businessName}
+                            city={lead.city}
+                            placeId={lead.placeId}
+                            website={lead.website}
+                          />
+                        </div>
+                        <div className="flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                           <EmailGenerator
                             businessName={lead.businessName}
                             category={lead.category}
@@ -889,6 +1033,28 @@ export function SavedLeadsTable({
                         </div>
                       </TableCell>
                     </TableRow>
+                    {expandedMobileLeadId === lead.id && (
+                      <TableRow className="md:hidden border-b border-gray-100 bg-gray-50/90 hover:bg-gray-50/90">
+                        <TableCell colSpan={8} className="py-3 px-4">
+                          <p className="text-[11px] font-medium text-gray-500 uppercase tracking-wide mb-2">
+                            Quick links
+                          </p>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <CopyBusinessLabel
+                              businessName={lead.businessName}
+                              city={lead.city}
+                            />
+                            <QuickGoogleActions
+                              businessName={lead.businessName}
+                              city={lead.city}
+                              placeId={lead.placeId}
+                              website={lead.website}
+                            />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                    </Fragment>
                   );
                 })}
               </TableBody>
