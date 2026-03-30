@@ -14,9 +14,10 @@ import type { AnalyzedBusiness, SearchResponse } from "@/types";
 
 export async function POST(request: NextRequest) {
   try {
-    // Rate limit: 5 searches per minute (Google Places API costs money)
+    // Rate limit: ~5 searches/min sustained (refill), higher burst so "Top Businesses"
+    // (10 parallel category calls) is not cut in half by 429s on a single instance.
     const key = getRateLimitKey(request, "search");
-    const { limited } = rateLimit(key, 5, 5 / 60);
+    const { limited } = rateLimit(key, 12, 5 / 60);
     if (limited) {
       return NextResponse.json(
         { error: "Too many searches. Please wait a moment before trying again." },
